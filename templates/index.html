@@ -1,32 +1,1203 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cloudtype - Flask</title>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@2.51.3/dist/full.css" rel="stylesheet" type="text/css" />
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2/dist/tailwind.min.css" rel="stylesheet" type="text/css" />
-  <link rel="shortcut icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NobiNobi - 일본어 스터디</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #495057, #6c757d);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .character {
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: relative;
+        }
+
+        .character:first-child::before {
+            content: "🎓";
+            position: absolute;
+            top: -5px;
+            font-size: 20px;
+        }
+
+        .character:nth-child(2)::before {
+            content: "😊";
+            position: absolute;
+        }
+
+        .character:nth-child(3)::before {
+            content: "🎌";
+            position: absolute;
+            top: -5px;
+            font-size: 20px;
+        }
+
+        .logo-text {
+            font-size: 36px;
+            font-weight: bold;
+            margin: 10px 0;
+            background: linear-gradient(45deg, #495057, #6c757d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #495057;
+            box-shadow: 0 0 0 3px rgba(73, 80, 87, 0.1);
+        }
+
+        .level-options, .activity-options, .date-options {
+            display: grid;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .option {
+            padding: 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .option:hover {
+            border-color: #495057;
+            transform: translateY(-2px);
+        }
+
+        .option.selected {
+            border-color: #495057;
+            background: linear-gradient(135deg, #495057, #6c757d);
+            color: white;
+        }
+
+        .option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: #f5f5f5;
+        }
+
+        .stars {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background: #343a40;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background: #495057;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(52, 58, 64, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .progress {
+            height: 6px;
+            background: #e1e5e9;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #495057, #6c757d);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .payment-info {
+            background: #f8f9ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .payment-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #495057;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .account-info {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .study-card {
+            background: linear-gradient(135deg, #6c757d, #adb5bd);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .attendance-section {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .progress-ring {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .circular-progress {
+            width: 120px;
+            height: 120px;
+            position: relative;
+        }
+
+        .circular-progress svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress-bg {
+            fill: none;
+            stroke: #e1e5e9;
+            stroke-width: 8;
+        }
+
+        .progress-bar-circle {
+            fill: none;
+            stroke: #495057;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 314;
+            stroke-dashoffset: 314;
+            transition: stroke-dashoffset 1s ease-in-out;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: #495057;
+        }
+
+        .progress-percentage {
+            font-size: 24px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .milestone-track {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 25px 0;
+            padding: 0 10px;
+        }
+
+        .milestone {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .milestone-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            border: 3px solid #e1e5e9;
+            background: white;
+        }
+
+        .milestone.achieved .milestone-icon {
+            background: linear-gradient(135deg, #495057, #6c757d);
+            color: white;
+            border-color: #495057;
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(73, 80, 87, 0.3);
+        }
+
+        .milestone.current .milestone-icon {
+            border-color: #ffd93d;
+            background: #fff8e1;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 217, 61, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 217, 61, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 217, 61, 0); }
+        }
+
+        .milestone-label {
+            font-size: 11px;
+            text-align: center;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .milestone.achieved .milestone-label {
+            color: #495057;
+            font-weight: bold;
+        }
+
+        .milestone-track::before {
+            content: '';
+            position: absolute;
+            top: 25px;
+            left: 35px;
+            right: 35px;
+            height: 3px;
+            background: #e1e5e9;
+            z-index: -1;
+        }
+
+        .achievement-badges {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .badge {
+            background: linear-gradient(135deg, #495057, #6c757d);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .badge.locked {
+            background: #e1e5e9;
+            color: #999;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #e1e5e9;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #495057;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .next-reward {
+            background: linear-gradient(135deg, #fff8e1, #ffeaa7);
+            border: 2px solid #ffd93d;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .next-reward-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #d63031;
+            margin-bottom: 5px;
+        }
+
+        .next-reward-text {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .tickets {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .ticket {
+            width: 80px;
+            height: 45px;
+            background: linear-gradient(135deg, #495057, #6c757d);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 10px;
+            margin: 5px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .ticket::before {
+            content: '';
+            position: absolute;
+            left: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: #f8f9fa;
+            border-radius: 50%;
+        }
+
+        .ticket::after {
+            content: '';
+            position: absolute;
+            right: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 10px;
+            height: 10px;
+            background: #f8f9fa;
+            border-radius: 50%;
+        }
+
+        .ticket-perforated {
+            position: relative;
+        }
+
+        .ticket-perforated::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                transparent 3px,
+                rgba(255,255,255,0.3) 3px,
+                rgba(255,255,255,0.3) 6px
+            );
+            transform: translateX(-50%);
+        }
+
+        .ticket-content {
+            text-align: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .ticket-title {
+            font-size: 8px;
+            opacity: 0.8;
+            margin-bottom: 2px;
+        }
+
+        .ticket-main {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #495057, #6c757d);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            opacity: 0;
+            animation: toastShow 3s ease-in-out;
+        }
+
+        @keyframes toastShow {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            10% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            90% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .info-text {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 15px 0;
+            text-align: center;
+            font-size: 14px;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
 </head>
 <body>
-<div class="hero min-h-screen bg-base-200">
-  <div class="hero-content flex-col lg:flex-row-reverse">
-    <img src="{{ url_for('static', filename='img/flask.webp') }}" class="w-36 rounded-lg md:ml-5 lg:ml-5"  alt="flask"/>
-    <div>
-      <h1 class="text-5xl font-bold">Flask</h1>
-      <p class="py-6">가나다라마바사</p>
-      <button type="button" onclick="window.open('https://github.com/cloudtype-examples/java-springboot')" class="btn btn-outline rounded">
-        GitHub
-      </button>
-      <button type="button" onclick="window.open('https://docs.cloudtype.io/')" class="btn btn-outline rounded">
-        Docs
-      </button>
-      <button type="button" onclick="window.open('https://discord.gg/U7HX4BA6hu')" class="btn btn-outline rounded">
-        Discord
-      </button>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <div class="character"></div>
+                <div class="character"></div>
+                <div class="character"></div>
+            </div>
+            <div class="logo-text">NobiNobi</div>
+            <div class="subtitle">まいしゅう すこしずつ</div>
+            <div class="subtitle">WEEKLY JAPANESE STUDY</div>
+        </div>
+
+        <!-- 메인 페이지 -->
+        <div class="content">
+            <div class="page active" id="main-page">
+                <h2 style="text-align: center; margin-bottom: 30px; color: #333;">
+                    🌸 10월 스터디와 함께 일본어 실력을 늘려보세요! 🌸
+                </h2>
+                <button class="btn" onclick="showPage('register-page-1')">
+                    10월 스터디 신청하기
+                </button>
+            </div>
+
+            <!-- 신청 페이지 1 -->
+            <div class="page" id="register-page-1">
+                <div class="progress">
+                    <div class="progress-bar" style="width: 20%"></div>
+                </div>
+                <h3 style="margin-bottom: 30px; text-align: center; color: #333;">기본 정보를 입력해주세요</h3>
+                
+                <div class="form-group">
+                    <label class="form-label">이름</label>
+                    <input type="text" class="form-input" id="name" placeholder="이름을 입력해주세요">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">핸드폰 번호</label>
+                    <input type="tel" class="form-input" id="phone" placeholder="010-1234-5678 또는 01012345678" oninput="autoFormatPhone(this)">
+                </div>
+                
+                <button class="btn" onclick="checkMember()">다음</button>
+            </div>
+
+            <!-- 신청 페이지 2 -->
+            <div class="page" id="register-page-2">
+                <div class="progress">
+                    <div class="progress-bar" style="width: 40%"></div>
+                </div>
+                <h3 style="margin-bottom: 30px; text-align: center; color: #333;">일본어 학습 수준을 선택해주세요</h3>
+                
+                <div class="level-options">
+                    <div class="option" data-level="0">
+                        <div class="stars">☆☆☆☆☆</div>
+                        <div>전혀 배운 적 없음</div>
+                    </div>
+                    <div class="option" data-level="1">
+                        <div class="stars">★☆☆☆☆</div>
+                        <div>히라가나/카타카나를 읽을 수 있음</div>
+                    </div>
+                    <div class="option" data-level="2">
+                        <div class="stars">★★☆☆☆</div>
+                        <div>기본 문법과 단어를 조금 앎</div>
+                    </div>
+                    <div class="option" data-level="3">
+                        <div class="stars">★★★☆☆</div>
+                        <div>간단한 회화를 할 수 있음</div>
+                    </div>
+                    <div class="option" data-level="4">
+                        <div class="stars">★★★★☆</div>
+                        <div>일상 대화에 어려움이 없음</div>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="validateAndNext('register-page-2', 'register-page-3')">다음</button>
+            </div>
+
+            <!-- 신청 페이지 3 -->
+            <div class="page" id="register-page-3">
+                <div class="progress">
+                    <div class="progress-bar" style="width: 60%"></div>
+                </div>
+                <h3 style="margin-bottom: 30px; text-align: center; color: #333;">함께하고 싶은 활동을 선택해주세요</h3>
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">복수 선택 가능합니다</p>
+                
+                <div class="activity-options">
+                    <div class="option" data-activity="vocabulary">
+                        📝 단어 시험
+                    </div>
+                    <div class="option" data-activity="conversation">
+                        💬 회화 연습
+                    </div>
+                    <div class="option" data-activity="culture">
+                        🏮 일본 문화 소개 및 토론
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="validateAndNext('register-page-3', 'register-page-4')">다음</button>
+            </div>
+
+            <!-- 신청 페이지 4 -->
+            <div class="page" id="register-page-4">
+                <div class="progress">
+                    <div class="progress-bar" style="width: 80%"></div>
+                </div>
+                <h3 style="margin-bottom: 30px; text-align: center; color: #333;">참석 가능한 날짜를 선택해주세요</h3>
+                
+                <div class="date-options">
+                    <div class="option" data-date="2024-10-01">
+                        <strong>1주차: 10월 1일 (수)</strong>
+                    </div>
+                    <div class="option disabled">
+                        <strong>2주차: 10월 8일 (수)</strong>
+                        <div style="font-size: 14px; margin-top: 5px; color: #ff6b6b;">
+                            추석으로 쉬어갑니다. 풍성한 한가위 되세요. 🌕
+                        </div>
+                    </div>
+                    <div class="option" data-date="2024-10-15">
+                        <strong>3주차: 10월 15일 (수)</strong>
+                    </div>
+                    <div class="option" data-date="2024-10-22">
+                        <strong>4주차: 10월 22일 (수)</strong>
+                    </div>
+                    <div class="option" data-date="2024-10-29">
+                        <strong>5주차: 10월 29일 (수)</strong>
+                    </div>
+                </div>
+                
+                <button class="btn" onclick="validateAndNext('register-page-4', 'register-page-5')">다음</button>
+            </div>
+
+            <!-- 신청 페이지 5 -->
+            <div class="page" id="register-page-5">
+                <div class="progress">
+                    <div class="progress-bar" style="width: 100%"></div>
+                </div>
+                <h3 style="margin-bottom: 30px; text-align: center; color: #333;">좋아하는 일본 노래를 소개해주세요! 🎶</h3>
+                <p style="text-align: center; color: #666; margin-bottom: 20px;">
+                    *매주 배부되는 노비노비 단어시험에 출제됩니다 (선택사항)
+                </p>
+                
+                <div class="form-group">
+                    <label class="form-label">좋아하는 일본 노래 (선택사항)</label>
+                    <input type="text" class="form-input" id="favorite-song" placeholder="예: 津軽海峡冬景色 - 石川さゆり (생략 가능)">
+                </div>
+                
+                <button class="btn" onclick="processRegistration()">완료</button>
+            </div>
+
+            <!-- 결제 페이지 -->
+            <div class="page" id="payment-page">
+                <h3 style="margin-bottom: 30px; text-align: center; color: #333;">결제 정보</h3>
+                
+                <div class="payment-info">
+                    <div class="payment-amount" id="payment-amount">총 결제 금액: 0원</div>
+                    <div class="account-info">
+                        계좌번호: 우리은행 1002366470628<br>
+                        예금주: 고은세
+                    </div>
+                    <p class="info-text">미참석 시 금액은 이월됩니다</p>
+                </div>
+                
+                <button class="btn" onclick="completePayment()">계좌이체 완료</button>
+            </div>
+
+            <!-- 마이 페이지 -->
+            <div class="page" id="my-page">
+                <h3 style="margin-bottom: 30px; text-align: center; color: #333;">마이 페이지</h3>
+                
+                <div class="study-card">
+                    <h4>📅 신청한 스터디 일정</h4>
+                    <div id="selected-dates"></div>
+                </div>
+                
+                <div style="background: #f8f9ff; padding: 20px; border-radius: 10px; margin: 20px 0;">
+                    <h4 style="margin-bottom: 15px; color: #333;">🎫 보유 티켓</h4>
+                    <div class="tickets" id="tickets"></div>
+                </div>
+                
+                <div class="attendance-section">
+                    <h4 style="margin-bottom: 20px; color: #333; text-align: center;">🏆 학습 여정 & 출석 현황</h4>
+                    
+                    <!-- 원형 진행률 표시 -->
+                    <div class="progress-ring">
+                        <div class="circular-progress">
+                            <svg>
+                                <circle class="progress-bg" cx="60" cy="60" r="50"></circle>
+                                <circle class="progress-bar-circle" cx="60" cy="60" r="50" id="progress-circle"></circle>
+                            </svg>
+                            <div class="progress-text">
+                                <div class="progress-percentage" id="attendance-percentage">0%</div>
+                                <div class="progress-label">출석률</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 마일스톤 트랙 -->
+                    <div class="milestone-track">
+                        <div class="milestone" data-sessions="1">
+                            <div class="milestone-icon">🌱</div>
+                            <div class="milestone-label">첫 도전</div>
+                        </div>
+                        <div class="milestone" data-sessions="3">
+                            <div class="milestone-icon">🌿</div>
+                            <div class="milestone-label">꾸준함</div>
+                        </div>
+                        <div class="milestone" data-sessions="5">
+                            <div class="milestone-icon">🌳</div>
+                            <div class="milestone-label">성장</div>
+                        </div>
+                        <div class="milestone" data-sessions="10">
+                            <div class="milestone-icon">🏅</div>
+                            <div class="milestone-label">노력왕</div>
+                        </div>
+                        <div class="milestone" data-sessions="20">
+                            <div class="milestone-icon">👑</div>
+                            <div class="milestone-label">마스터</div>
+                        </div>
+                    </div>
+
+                    <!-- 통계 그리드 -->
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="total-attended">0</div>
+                            <div class="stat-label">총 출석</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="current-streak">0</div>
+                            <div class="stat-label">연속 출석</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="total-weeks">0</div>
+                            <div class="stat-label">함께한 주</div>
+                        </div>
+                    </div>
+
+                    <!-- 획득 배지 -->
+                    <div class="achievement-badges" id="badges-container">
+                        <!-- 동적으로 생성됩니다 -->
+                    </div>
+
+                    <!-- 다음 보상 -->
+                    <div class="next-reward" id="next-reward">
+                        <div class="next-reward-title">🎯 다음 목표</div>
+                        <div class="next-reward-text">1회 더 출석하면 "꾸준함" 배지를 획득할 수 있어요!</div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
+
+    <script>
+        // 데이터 저장소 (실제 환경에서는 데이터베이스 사용)
+        let userData = {
+            name: '',
+            phone: '',
+            isExistingMember: false,
+            level: null,
+            activities: [],
+            selectedDates: [],
+            favoriteSong: '',
+            tickets: 0,
+            attendedDates: []
+        };
+
+        let members = [
+            { name: '김철수', phone: '010-1234-5678', level: 2, activities: ['vocabulary', 'conversation'], tickets: 2, attendedDates: [1, 2] },
+            { name: '이영희', phone: '010-9876-5432', level: 3, activities: ['conversation', 'culture'], tickets: 1, attendedDates: [1] }
+        ];
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.getElementById(pageId).classList.add('active');
+        }
+
+        function checkMember() {
+            const name = document.getElementById('name').value.trim();
+            let phone = document.getElementById('phone').value.trim();
+
+            // 기존 에러 메시지 제거
+            const existingError = document.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            if (!name || !phone) {
+                showErrorMessage('register-page-1', '이름과 핸드폰 번호를 모두 입력해주세요.');
+                return;
+            }
+
+            // 핸드폰 번호 자동 포맷팅
+            phone = formatPhoneNumber(phone);
+            
+            if (!phone) {
+                showErrorMessage('register-page-1', '올바른 핸드폰 번호를 입력해주세요. (010으로 시작하는 11자리 숫자)');
+                return;
+            }
+
+            // 포맷팅된 번호를 입력 필드에 다시 설정
+            document.getElementById('phone').value = phone;
+
+            userData.name = name;
+            userData.phone = phone;
+
+            // 기존 회원 확인
+            const existingMember = members.find(member => 
+                member.name === name && member.phone === phone
+            );
+
+            if (existingMember) {
+                userData.isExistingMember = true;
+                userData.level = existingMember.level;
+                userData.activities = existingMember.activities;
+                userData.tickets = existingMember.tickets;
+                userData.attendedDates = existingMember.attendedDates;
+                showPage('register-page-4');
+            } else {
+                userData.isExistingMember = false;
+                showPage('register-page-2');
+            }
+        }
+
+        function formatPhoneNumber(phone) {
+            // 숫자만 추출
+            const numbers = phone.replace(/\D/g, '');
+            
+            // 010으로 시작하는 11자리 숫자인지 확인
+            if (!numbers.startsWith('010') || numbers.length !== 11) {
+                return null;
+            }
+            
+            // 010-1234-5678 형식으로 포맷팅
+            return numbers.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+        }
+
+        // 레벨 선택 처리
+        document.querySelectorAll('.level-options .option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.level-options .option').forEach(opt => 
+                    opt.classList.remove('selected')
+                );
+                this.classList.add('selected');
+                userData.level = parseInt(this.dataset.level);
+            });
+        });
+
+        // 활동 선택 처리 (복수 선택)
+        document.querySelectorAll('.activity-options .option').forEach(option => {
+            option.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                const activity = this.dataset.activity;
+                
+                if (userData.activities.includes(activity)) {
+                    userData.activities = userData.activities.filter(a => a !== activity);
+                } else {
+                    userData.activities.push(activity);
+                }
+            });
+        });
+
+        // 날짜 선택 처리 (복수 선택)
+        document.querySelectorAll('.date-options .option:not(.disabled)').forEach(option => {
+            option.addEventListener('click', function() {
+                this.classList.toggle('selected');
+                const date = this.dataset.date;
+                
+                if (userData.selectedDates.includes(date)) {
+                    userData.selectedDates = userData.selectedDates.filter(d => d !== date);
+                } else {
+                    userData.selectedDates.push(date);
+                }
+            });
+        });
+
+        function processRegistration() {
+            const favoriteSong = document.getElementById('favorite-song').value.trim();
+
+            // 기존 에러 메시지 제거
+            const existingError = document.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            // 노래 추천은 선택사항이므로 빈 값이어도 진행
+            userData.favoriteSong = favoriteSong || ''; // 빈 문자열로 설정
+
+            // 결제 금액 계산
+            const selectedDatesCount = userData.selectedDates.length;
+            const costPerSession = 4700;
+            let totalCost = selectedDatesCount * costPerSession;
+            
+            // 보유 티켓으로 차감
+            const ticketsToUse = Math.min(userData.tickets, selectedDatesCount);
+            totalCost -= (ticketsToUse * costPerSession);
+
+            document.getElementById('payment-amount').textContent = 
+                `총 결제 금액: ${totalCost.toLocaleString()}원`;
+
+            if (totalCost === 0) {
+                document.getElementById('payment-amount').textContent += ' (보유 티켓으로 결제 완료)';
+            }
+
+            showPage('payment-page');
+        }
+
+        function validateAndNext(currentPage, nextPage) {
+            // 기존 에러 메시지 제거
+            const existingError = document.querySelector('.error-message');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            if (currentPage === 'register-page-2') {
+                if (userData.level === null) {
+                    showErrorMessage('register-page-2', '학습 수준을 선택해주세요.');
+                    return;
+                }
+            } else if (currentPage === 'register-page-3') {
+                if (userData.activities.length === 0) {
+                    showErrorMessage('register-page-3', '참여하고 싶은 활동을 최소 하나 이상 선택해주세요.');
+                    return;
+                }
+            } else if (currentPage === 'register-page-4') {
+                if (userData.selectedDates.length === 0) {
+                    showErrorMessage('register-page-4', '참석 가능한 날짜를 최소 하나 이상 선택해주세요.');
+                    return;
+                }
+            }
+
+            showPage(nextPage);
+        }
+
+        function showErrorMessage(pageId, message) {
+            const page = document.getElementById(pageId);
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            
+            // 버튼 바로 위에 에러 메시지 삽입
+            const button = page.querySelector('.btn');
+            button.parentNode.insertBefore(errorDiv, button);
+            
+            // 에러 메시지로 스크롤
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function autoFormatPhone(input) {
+            // 입력하는 동안 실시간으로 포맷팅
+            let value = input.value.replace(/\D/g, ''); // 숫자만 추출
+            
+            if (value.length >= 3) {
+                if (value.length <= 7) {
+                    value = value.replace(/(\d{3})(\d{1,4})/, '$1-$2');
+                } else {
+                    value = value.replace(/(\d{3})(\d{4})(\d{1,4})/, '$1-$2-$3');
+                }
+            }
+            
+            // 최대 13자리로 제한 (010-1234-5678)
+            if (value.length > 13) {
+                value = value.substring(0, 13);
+            }
+            
+            input.value = value;
+        }
+
+        function completePayment() {
+            // 티켓 업데이트
+            const selectedDatesCount = userData.selectedDates.length;
+            const newTickets = Math.max(0, selectedDatesCount - userData.tickets);
+            userData.tickets = newTickets;
+
+            // 마이페이지 데이터 설정
+            updateMyPage();
+
+            showPage('my-page');
+            showToast();
+        }
+
+        function updateMyPage() {
+            // 선택한 날짜 표시
+            const dateTexts = {
+                '2024-10-01': '1주차: 10월 1일 (수)',
+                '2024-10-15': '3주차: 10월 15일 (수)',
+                '2024-10-22': '4주차: 10월 22일 (수)',
+                '2024-10-29': '5주차: 10월 29일 (수)'
+            };
+
+            const selectedDatesHtml = userData.selectedDates
+                .map(date => `<div style="margin: 10px 0;">📅 ${dateTexts[date]}</div>`)
+                .join('');
+            document.getElementById('selected-dates').innerHTML = selectedDatesHtml;
+
+            // 티켓 표시
+            const ticketsHtml = Array(userData.tickets)
+                .fill()
+                .map((_, index) => `
+                    <div class="ticket ticket-perforated">
+                        <div class="ticket-content">
+                            <div class="ticket-title">NOBINOBI</div>
+                            <div class="ticket-main">🎫</div>
+                        </div>
+                    </div>
+                `)
+                .join('');
+            document.getElementById('tickets').innerHTML = ticketsHtml || '<div>보유 티켓이 없습니다</div>';
+
+            // 출석 현황 업데이트
+            updateAttendanceProgress();
+        }
+
+        function updateAttendanceProgress() {
+            const totalSessions = 10; // 예시: 총 10회 스터디
+            const attendedCount = userData.attendedDates.length;
+            const attendanceRate = totalSessions > 0 ? Math.round((attendedCount / totalSessions) * 100) : 0;
+
+            // 원형 진행률 업데이트
+            const progressCircle = document.getElementById('progress-circle');
+            const circumference = 2 * Math.PI * 50;
+            const offset = circumference - (attendanceRate / 100) * circumference;
+            progressCircle.style.strokeDashoffset = offset;
+
+            document.getElementById('attendance-percentage').textContent = `${attendanceRate}%`;
+
+            // 통계 업데이트
+            document.getElementById('total-attended').textContent = attendedCount;
+            document.getElementById('current-streak').textContent = calculateStreak();
+            document.getElementById('total-weeks').textContent = Math.ceil(attendedCount / 1) || 1;
+
+            // 마일스톤 업데이트
+            updateMilestones(attendedCount);
+
+            // 배지 업데이트
+            updateBadges(attendedCount, attendanceRate);
+
+            // 다음 보상 업데이트
+            updateNextReward(attendedCount);
+        }
+
+        function calculateStreak() {
+            // 간단한 연속 출석 계산 (실제로는 더 복잡한 로직 필요)
+            return userData.attendedDates.length >= 2 ? 2 : userData.attendedDates.length;
+        }
+
+        function updateMilestones(attendedCount) {
+            const milestones = document.querySelectorAll('.milestone');
+            milestones.forEach(milestone => {
+                const requiredSessions = parseInt(milestone.dataset.sessions);
+                if (attendedCount >= requiredSessions) {
+                    milestone.classList.add('achieved');
+                } else if (attendedCount === requiredSessions - 1) {
+                    milestone.classList.add('current');
+                }
+            });
+        }
+
+        function updateBadges(attendedCount, attendanceRate) {
+            const badges = [];
+            
+            // 출석 기반 배지
+            if (attendedCount >= 1) badges.push({ icon: '🌱', text: '첫 도전', unlocked: true });
+            else badges.push({ icon: '🌱', text: '첫 도전', unlocked: false });
+
+            if (attendedCount >= 3) badges.push({ icon: '🌿', text: '꾸준함', unlocked: true });
+            else badges.push({ icon: '🌿', text: '꾸준함', unlocked: false });
+
+            if (attendedCount >= 5) badges.push({ icon: '🌳', text: '성장', unlocked: true });
+            else badges.push({ icon: '🌳', text: '성장', unlocked: false });
+
+            // 출석률 기반 배지
+            if (attendanceRate >= 80) badges.push({ icon: '⭐', text: '우수 출석', unlocked: true });
+            else badges.push({ icon: '⭐', text: '우수 출석', unlocked: false });
+
+            if (attendanceRate === 100 && attendedCount >= 3) badges.push({ icon: '💎', text: '퍼펙트', unlocked: true });
+            else badges.push({ icon: '💎', text: '퍼펙트', unlocked: false });
+
+            const badgesHtml = badges
+                .map(badge => `
+                    <div class="badge ${badge.unlocked ? '' : 'locked'}">
+                        ${badge.icon} ${badge.text}
+                    </div>
+                `)
+                .join('');
+            
+            document.getElementById('badges-container').innerHTML = badgesHtml;
+        }
+
+        function updateNextReward(attendedCount) {
+            const nextRewardElement = document.getElementById('next-reward');
+            let nextGoal = '';
+            
+            if (attendedCount === 0) {
+                nextGoal = '1회 출석하면 "첫 도전" 배지를 획득할 수 있어요!';
+            } else if (attendedCount < 3) {
+                nextGoal = `${3 - attendedCount}회 더 출석하면 "꾸준함" 배지를 획득할 수 있어요!`;
+            } else if (attendedCount < 5) {
+                nextGoal = `${5 - attendedCount}회 더 출석하면 "성장" 배지를 획득할 수 있어요!`;
+            } else if (attendedCount < 10) {
+                nextGoal = `${10 - attendedCount}회 더 출석하면 "노력왕" 배지를 획득할 수 있어요!`;
+            } else {
+                nextGoal = '모든 마일스톤을 달성했어요! 🎉';
+                nextRewardElement.style.background = 'linear-gradient(135deg, #d4edda, #a3d9a4)';
+            }
+            
+            nextRewardElement.querySelector('.next-reward-text').textContent = nextGoal;
+        }
+
+        function showToast() {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = '신청완료! 노비노비에서 만나요 🌸';
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
